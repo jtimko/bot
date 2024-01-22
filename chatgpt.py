@@ -7,7 +7,6 @@ import pyttsx3
 import pygame
 import threading
 
-pygame.init()
 load_dotenv()
 
 class ChatBot:
@@ -75,6 +74,7 @@ class ChatBot:
             print("unknown error occured")
 
 def pygame_thread():
+    pygame.init()
     screen = pygame.display.set_mode((480, 800))
     clock = pygame.time.Clock()
     running = True
@@ -116,36 +116,3 @@ t2 = threading.Thread(target=chatbot_thread, args=(bot,))
 t1.start()
 t2.start()
 t1.join()
-
-
-# screen = pygame.display.set_mode((480, 800))
-# clock = pygame.time.Clock()
-# running = True
-# count = 0
-
-# try:
-#     while running:
-#         for event in pygame.event.get():
-#             if event.type == pygame.QUIT:
-#                 running = False
-#         time.sleep(.5)
-#         count += 1
-#         screen.fill("purple")
-        
-#         if count % 10 == 0:
-#             pygame.draw.arc(screen, "black", (190, 190, 20, 20), start_angle, end_angle, 1)
-#             pygame.draw.arc(screen, "black", (270, 190, 20, 20), start_angle, end_angle, 1)
-#         else:
-#             pygame.draw.circle(screen, "black", (200, 200), 10)
-#             pygame.draw.circle(screen, "black", (280, 200), 10)
-        
-#         pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
-
-
-#         start_angle = 3.14
-#         end_angle = 3.14 * 2
-
-#         pygame.display.flip()
-#         clock.tick(40)
-# except KeyboardInterrupt:
-#     print("Program stopped manually")
