@@ -73,7 +73,7 @@ class ChatBot:
         except sr.UnknownValueError:
             print("unknown error occured")
 
-def pygame_thread():
+def pygame_thread(bot):
     pygame.init()
     screen = pygame.display.set_mode((480, 800))
     clock = pygame.time.Clock()
@@ -96,7 +96,14 @@ def pygame_thread():
                 pygame.draw.circle(screen, "black", (200, 200), 10)
                 pygame.draw.circle(screen, "black", (280, 200), 10)
             
-            pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
+            if bot.is_speaking:
+                if count % 2 == 0:
+                    pygame.draw.circle(screen, "black", (240, 290), 60)
+                    pygame.draw.rect(screen, "purple", (240 - 100, 290 - 60, 2*100, 60), 100)
+                else:
+                    pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
+            else:
+                pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
 
 
             start_angle = 3.14
@@ -111,7 +118,7 @@ def chatbot_thread(bot):
     bot.start_bot()
 
 bot = ChatBot()
-t1 = threading.Thread(target=pygame_thread)
+t1 = threading.Thread(target=pygame_thread, args=(bot,))
 t2 = threading.Thread(target=chatbot_thread, args=(bot,))
 t1.start()
 t2.start()
