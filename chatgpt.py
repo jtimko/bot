@@ -21,11 +21,12 @@ class ChatBot:
                 "role": "system",
                 "content": "You are a snarky chatbot that has a crude sense of humor.",
             }]
+        self.microphone_index = 0
 
     def start_bot(self):
-        with sr.Microphone(0) as source:
+        with sr.Microphone(self.microphone_index) as source:
             self.r.adjust_for_ambient_noise(source, duration=1)
-        self.r.listen_in_background(sr.Microphone(0), self.callback, phrase_time_limit=5)
+        self.r.listen_in_background(sr.Microphone(self.microphone_index), self.callback, phrase_time_limit=5)
         print("done")
 
     def ask_chatbot(self):
