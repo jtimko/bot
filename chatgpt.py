@@ -17,6 +17,7 @@ class ChatBot:
         self.bot_name = "charlie"
         self.is_listening_for_question = False
         self.is_speaking = False
+        self.is_showing_text = False
         self.history = [{
                 "role": "system",
                 "content": "You are a snarky chatbot that has a crude sense of humor.",
@@ -27,7 +28,6 @@ class ChatBot:
         with sr.Microphone(self.microphone_index) as source:
             self.r.adjust_for_ambient_noise(source, duration=1)
         self.r.listen_in_background(sr.Microphone(self.microphone_index), self.callback, phrase_time_limit=5)
-        print("done")
 
     def ask_chatbot(self):
         chat_completion = self.client.chat.completions.create(
@@ -59,10 +59,14 @@ class ChatBot:
                 if self.bot_name in trigger.lower():
                     print("Listening...")
                     self.is_listening_for_question = True
+                if "clear" in trigger.lower():
+                    self.is_showing_text = False
             else:
                 question = recognizer.recognize_google(audio)
                 question = question.lower()
                 if len(question) > 0:
+                    if "show" in question.lower():
+                        self.is_showing_text = True
                     self.history.append({"role": "user", "content": question})
                     self.speak_text(self.ask_chatbot())
                     self.is_listening_for_question = False
@@ -74,12 +78,17 @@ class ChatBot:
         except sr.UnknownValueError:
             print("unknown error occured")
 
+# Clean up this function
 def pygame_thread(bot):
     pygame.init()
-    screen = pygame.display.set_mode((480, 800))
+    height = 800
+    width = 480
+    screen = pygame.display.set_mode((width, height))
     clock = pygame.time.Clock()
     running = True
     count = 0
+    start_angle = 3.14
+    end_angle = 3.14 * 2
 
     try:
         while running:
@@ -89,26 +98,36 @@ def pygame_thread(bot):
             time.sleep(.5)
             count += 1
             screen.fill("purple")
-            
-            if count % 10 == 0:
-                pygame.draw.arc(screen, "black", (190, 190, 20, 20), start_angle, end_angle, 1)
-                pygame.draw.arc(screen, "black", (270, 190, 20, 20), start_angle, end_angle, 1)
+            print("show text", bot.is_showing_text)
+            if bot.is_showing_text:
+                font = pygame.font.Font(None, 32)
+                text = font.render(bot.history[-1]["content"], True, "white", "purple")
+                textRect = text.get_rect()
+                textRect.center = (240, 190)
+                screen.blit(text, textRect)
             else:
-                pygame.draw.circle(screen, "black", (200, 200), 10)
-                pygame.draw.circle(screen, "black", (280, 200), 10)
-            
-            if bot.is_speaking:
-                if count % 2 == 0:
-                    pygame.draw.circle(screen, "black", (240, 290), 60)
-                    pygame.draw.rect(screen, "purple", (240 - 100, 290 - 60, 2*100, 60), 100)
+                if count % 10 == 0:
+                    pygame.draw.arc(screen, "black", (190, 190, 20, 20), start_angle, end_angle, 1)
+                    pygame.draw.arc(screen, "black", (270, 190, 20, 20), start_angle, end_angle, 1)
+                else:
+                    pygame.draw.circle(screen, "black", (200, 200), 10)
+                    pygame.draw.circle(screen, "black", (280, 200), 10)
+
+                if bot.is_listening_for_question:
+                    font = pygame.font.Font(None, 32)
+                    text = font.render('?', True, "white", "purple")
+                    textRect = text.get_rect()
+                    textRect.center = (310, 190)
+                    screen.blit(text, textRect)
+                
+                if bot.is_speaking:
+                    if count % 2 == 0:
+                        pygame.draw.circle(screen, "black", (240, 290), 60)
+                        pygame.draw.rect(screen, "purple", (240 - 100, 290 - 60, 2*100, 60), 100)
+                    else:
+                        pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
                 else:
                     pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
-            else:
-                pygame.draw.arc(screen, "black", (170, 200, 150, 150), 3.14, 3.14 * 2, 1)
-
-
-            start_angle = 3.14
-            end_angle = 3.14 * 2
 
             pygame.display.flip()
             clock.tick(40)
